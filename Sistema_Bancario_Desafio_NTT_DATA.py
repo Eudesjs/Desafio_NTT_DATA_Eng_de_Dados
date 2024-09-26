@@ -5,13 +5,13 @@ import textwrap
 def menu():
     menu = """\n
     ================================= MENU ================================
-    [D]\tDepositar
-    [S]\tSacar
-    [E]\tExtrato
-    [Nc]\tNova Conta
-    [Lc]\tListar Conta
-    [Nu]\tNovo Usuário
-    [Q]\tSair
+    [d]\tDepositar
+    [s]\tSacar
+    [e]\tExtrato
+    [nc]\tNova Conta
+    [lc]\tListar Conta
+    [nu]\tNovo Usuário
+    [q]\tSair
     === """
 
     return input(textwrap.dedent(menu))
@@ -55,25 +55,25 @@ def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
 # Função Extrato()
 
 def exibir_extrato(saldo, /, *, extrato):
-    print("\n======================= EXTRATO =============================")
-    print("\n Nao Foram Realizado Movimentações." if not extrato else extrato)
-    print("\nSaldo:\t\tR$ {saldo:.2f}")
-    print("================================================================")
+        if not extrato:
+            print("\n======================= EXTRATO =============================")
+            print("Nao Foram Realizado Movimentações.")
+        else:
+            print(f"Conta:\t\tR$ {extrato}")
+            print(f"\nSaldo:\t\tR$ {saldo:.2f}")
+            print("================================================================")
 
+# Função Nova_Conta()
 
-# Função Criar Usuário()
+def nova_conta(agencia, numero_conta, usuarios):
+    cpf = input("Informe o CPF do Usuário: ")
+    usuario = nova_conta(cpf, usuarios)
 
-def criar_usuario(usuarios):
-    cpf = input("Informe o CPF (Somente Números): ")
-    usuario = filtrar_usuario(cpf, usuarios)
     if usuario:
-        print("\n@@@ Já Existe Usuário com esse CPF! @@@")
-        return
-    nome = input("Informe o Nome Completo: ")
-    data_nascimento = input("Informe a Data de Nascimento (dd, mm, aaaa): ")
-    endereco = input("Informe o Endereço (Logradouro - Numero - Bairro - Cidade/Sigla - Estado): ")
-    usuarios.append({"nome": nome, "Data_Nascimento": data_nascimento, "CPF": cpf, "Endereço": endereco})
-    print("\n=== Usuário Criado com Sucesso! ===")
+        print("\n=== Conta Criada com Sucesso! ===")
+    return {"agencia": agencia, "numero_conta": numero_conta, "usuario": {"nome": usuario["nome"], "cpf": usuario["cpf"], "data_nascimento": usuario["data_nascimento"], "endereco": usuario["endereco"]}}
+    
+    print("\n@@@ Usuário não Encontrado, Fluxo de Criação de Conta Encerrado! @@@")
 
 # Função Filtrar_USuario()
 
@@ -83,11 +83,88 @@ def filtrar_usuario(cpf, usuarios):
 
 # Função Criar_Conta()
 
-def criar_conta(agencia, numero_conta, usuarios):
+def nova_conta(agencia, numero_conta, usuarios):
     cpf = input("Informe o CPF do Usuário: ")
-    usuario = filtrar_usuario(cpf, usuarios)
+    usuario = nova_conta(usuarios, agencia)
     if usuario:
         print("\n=== Conta Criada com Sucesso ===")
         return {"agencia": agencia, "numero_conta": numero_conta, "usuario": usuario}
-        print("\n@@@ Usuario nao Encontrado, Fluxo de Criação de Conta Encerrado! @@@")
+       
+    print("\n@@@ Usuario nao Encontrado, Fluxo de Criação de Conta Encerrado! @@@")
         
+# Função Listar_Contas()
+
+def listar_contas(contas):
+    for conta in contas:
+        linha = f"""\
+            Agência:\t{conta['agencia']}
+            C/C:\t{conta['numero_conta']}
+            Titular:\t{conta['usuario']['nome']}
+        """
+        print("=" * 100)
+        print(textwrap.dedent(linha))
+
+
+# Função Novo_Usuario()
+
+def novo_usuario(usuarios):
+    cpf = input("Informe o CPF (Apenas Números): ")
+    usuario = nova_conta(cpf, usuarios)
+
+    if usuario:
+        print("\n@@@ Já Existe Usuário com esse CPF! @@@")
+    else: 
+        nome = input("Informe o Nome Completo: ")
+        data_nascimento = input("Informe a Data de Nascimento (dd - mm - aaaa): ")
+        endereco = input("Informe o Endereço (Logradouro, Nro - Bairro - Cidade - Estado/sigla): ")
+        usuarios.append({"nome": nome, "cpf": cpf, "data_nascimento": data_nascimento, "endereco": endereco})
+        print("=== Usuario Criado com Sucesso! ===")
+
+# Função main()
+
+def main():
+    LIMITE_SAQUES = 3
+    AGENCIA = "0001"
+    saldo = 0
+    limite = 500
+    extrato = ""
+    numero_saques = 0
+    usuarios = []
+    contas = []
+
+    while True:
+        opcao = menu()
+        if opcao == "d":
+            valor = float(input("Informe o Valor do Depósito: "))
+            saldo, extrato = depositar(saldo, valor, extrato)
+
+        elif opcao == "s":
+            valor = float(input("Informe o Valor do Saque: "))
+            saldo, extrato = sacar(
+                saldo = saldo,
+                valor = valor,
+                extrato = extrato,
+                limite = limite,
+                numero_saques = numero_saques,
+                limite_saques = LIMITE_SAQUES,
+            )   
+
+        elif opcao == "e":
+            exibir_extrato(saldo, extrato = extrato)
+
+        elif opcao == "nc":
+            numero_conta = len(contas) + 1
+            conta = nova_conta(AGENCIA, numero_conta, usuarios)
+
+            if conta:
+                contas.append(conta)
+
+        elif opcao == "lc":
+            listar_contas(conta)
+
+        elif opcao == "q":
+            break
+        else:
+            print("Operação Inválida, por faovr Selecione Novamente a Operação Desejada.")
+
+main()
