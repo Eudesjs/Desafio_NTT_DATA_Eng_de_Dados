@@ -43,7 +43,7 @@ def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
         print("\n@@@ Operação Falhou! Número Máximo de Saques Excedido. @@@")
     elif valor > 0:
         saldo -= valor
-        extrato += f"Saque:\tR$: {valor:.2f}\n"
+        extrato += f"Saque:\t\tR$: {valor:.2f}\n"
         numero_saques += 1
         print("\n@@@ === Saque Realizado Com Sucesso === @@@")
     else:
@@ -55,31 +55,45 @@ def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
 # Função Extrato()
 
 def exibir_extrato(saldo, /, *, extrato):
-        if not extrato:
-            print("\n======================= EXTRATO =============================")
-            print("Nao Foram Realizado Movimentações.")
-        else:
-            print(f"Conta:\t\tR$ {extrato}")
-            print(f"\nSaldo:\t\tR$ {saldo:.2f}")
-            print("================================================================")
+    print("\n=================== EXTRATO ======================")
+    print("Não foram realizadas movimentações." if not extrato else extrato)
+    print(f"\nSaldo:\t\tR$ {saldo:.2f}")
+    print("====================================================")
+
+# Função Criar_Usuário()
+
+def criar_usuario(usuarios):
+    cpf = input("Informe o CPF (Somente Número): ")
+    usuario = filtrar_usuario(cpf, usuarios)
+
+    if usuario:
+        print("\n@@@ Já Existe usuário com esse CPF! @@@")
+        return
+    
+    nome = input("Informe o Nome Completo: ")
+    data_nascimento = input("Informe a Data de Nascimento (dd-mm-aaa): ")
+    endereco = input("Informe o Endereço (Logradouro, Nro - Bairro - Cidade/Sigla Estado): ")
+
+    usuarios.append({"nome": nome, "data_nascimento": data_nascimento, "cpf": cpf, "endereço": endereco})
+
+    print("=== Usuário Criado com Sucesso! ===")
+
+# Função Filtrar_Usuário()
+
+def filtrar_usuario(cpf, usuarios):
+    usuarios_filtrados = [usuario for usuario in usuarios if usuario["cpf"] == cpf]
+    return usuarios_filtrados[0] if usuarios_filtrados else None
 
 # Função Nova_Conta()
 
-def nova_conta(agencia, numero_conta, usuarios):
+def criar_conta(agencia, numero_conta, usuarios):
     cpf = input("Informe o CPF do Usuário: ")
-    usuario = nova_conta(cpf, usuarios)
-
+    usuario = criar_conta(usuarios, agencia)
     if usuario:
         print("\n=== Conta Criada com Sucesso! ===")
-    return {"agencia": agencia, "numero_conta": numero_conta, "usuario": {"nome": usuario["nome"], "cpf": usuario["cpf"], "data_nascimento": usuario["data_nascimento"], "endereco": usuario["endereco"]}}
-    
+        return {"agencia": agencia, "numero_conta": numero_conta, "usuario": {usuarios}}
     print("\n@@@ Usuário não Encontrado, Fluxo de Criação de Conta Encerrado! @@@")
-
-# Função Filtrar_USuario()
-
-def filtrar_usuario(cpf, usuarios):
-    usuario_filtrados = [usuario for usuario in usuarios if usuario["cpf"] == cpf]
-    return usuario_filtrados[0] if usuario_filtrados else None
+    return None
 
 # Função Criar_Conta()
 
@@ -141,20 +155,23 @@ def main():
         elif opcao == "s":
             valor = float(input("Informe o Valor do Saque: "))
             saldo, extrato = sacar(
-                saldo = saldo,
-                valor = valor,
-                extrato = extrato,
-                limite = limite,
-                numero_saques = numero_saques,
-                limite_saques = LIMITE_SAQUES,
+                saldo=saldo,
+                valor=valor,
+                extrato=extrato,
+                limite=limite,
+                numero_saques=numero_saques,
+                limite_saques=LIMITE_SAQUES,
             )   
 
         elif opcao == "e":
-            exibir_extrato(saldo, extrato = extrato)
+            exibir_extrato(saldo, extrato=extrato)
+
+        elif opcao == "nu":
+            criar_usuario(usuarios)
 
         elif opcao == "nc":
             numero_conta = len(contas) + 1
-            conta = nova_conta(AGENCIA, numero_conta, usuarios)
+            conta = criar_conta(AGENCIA, numero_conta, usuarios )
 
             if conta:
                 contas.append(conta)
